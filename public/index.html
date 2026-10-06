@@ -43,11 +43,11 @@ a{color:inherit;text-decoration:none}
 
 /* ---------- Backdrop ---------- */
 .backdrop{position:absolute;inset:0;z-index:-1;overflow:hidden;background:var(--space);container-type:size;pointer-events:none}
-.backdrop img{
+.backdrop video{
   --c: max(calc(100cqw / 1280), calc(100cqh / 914));
   --bw: max(calc(1270.64 * var(--c)), calc(100cqw - 9.36 * var(--c)));
   --bh: max(calc(963.82 * var(--c)), calc(100cqh + .97 * var(--c)));
-  position:absolute;display:block;max-width:none;
+  position:absolute;display:block;max-width:none;object-fit:cover;
   width:var(--bw);height:var(--bh);
   left:calc((100cqw - var(--bw)) * var(--bgx, 0) + .25 * var(--c) * (1 - var(--bgx, 0)));
   top:calc(-.97 * var(--c));
@@ -231,7 +231,7 @@ html.intro .bar,html.intro .copy{opacity:0}
 </head>
 <body>
 <main class="hero">
-  <div class="backdrop" aria-hidden="true"><img alt="" src="assets/starform-background.jpg" width="1448" height="1086" decoding="sync"></div>
+  <div class="backdrop" aria-hidden="true"><video autoplay muted loop playsinline src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261005_182519_f799c5fd-49af-441d-a7fa-44ac37a7f327.mp4" width="1448" height="1086"></video></div>
 
   <header class="bar">
     <a class="logo" href="#" aria-label="Starform home">
@@ -314,8 +314,13 @@ html.intro .bar,html.intro .copy{opacity:0}
   function reveal(){html.classList.remove('intro');clearTimeout(window.__introFailsafe);}
   if(!Element.prototype.animate){reveal();return;}
 
-  var img=q('.backdrop img');
-  var ready=Promise.all([document.fonts?document.fonts.ready:0, img&&img.decode?img.decode().catch(function(){}):0]);
+  var bg=q('.backdrop video');
+  var mediaReady=bg?new Promise(function(r){
+    if(bg.readyState>=2){r();return;}
+    bg.addEventListener('loadeddata',function(){r();},{once:true});
+    bg.addEventListener('error',function(){r();},{once:true});
+  }):0;
+  var ready=Promise.all([document.fonts?document.fonts.ready:0, mediaReady]);
   Promise.race([ready,new Promise(function(r){setTimeout(r,1200)})]).then(function(){requestAnimationFrame(start)});
 
   function start(){
